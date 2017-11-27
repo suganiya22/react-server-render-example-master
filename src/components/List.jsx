@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
+import 'isomorphic-fetch';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import PagingPanel from './PagingPanel';
-import { fetchUsers, setSearch } from '../reducers/users';
+import ListUser from './ListUser';
+import { fetchUsers, setSearch,requestUsersPage } from '../reducers/users';
 import SearchPanel from './SearchPanel';
 
 class List extends Component {
@@ -11,6 +12,7 @@ class List extends Component {
   constructor(props) {
     super(props);
     this.handleSearchKeyup = this.handleSearchKeyup.bind(this);
+     
   }
 
   handleSearchKeyup(search) {
@@ -18,7 +20,7 @@ class List extends Component {
   }
 
   componentDidMount() {
-    this.props.fetchUsers();
+    this.props.fetchUsers(0,5);
     
   }
 
@@ -26,38 +28,91 @@ class List extends Component {
     return !this.props.search || item.name.indexOf(this.props.search) !== -1;
   }
 
+  limitPerPage (begin, end, increase) {
+    this.props.requestUsersPage(this.props.currentPage,increase);
+   this.props.fetchUsers(begin,end);
+  
+   console.log("LIMITS_RANGE",begin,end,increase);
+
+ 
+}
+
+  renderPageLinks(){
+
+   var liStyle2 = {
+      listStyle:"none",
+      padding:"7px",
+      display:"inline",
+      fontSize:"14px",
+      backgroundColor:"#f2f2f2",
+      borderRadius:"6px",
+      color: "#333",
+      fontWeight: "bold",
+      margin: "5px"
+      } 
+   var liStyle3 = {
+      listStyle:"none",
+      padding:"7px",
+      display:"inline",
+      fontSize:"14px",
+      backgroundColor:"#333",
+      borderRadius:"6px",
+      color: "#fff",
+      fontWeight: "bold",
+      margin: "5px",
+      opacity:"0.8",
+      border:"2px dotted #fff",   
+      }   
+    
+    console.log("StateCurrentPage",this.props.currentPage,this.props.count);
+    const cPage=this.props.currentPage;
+    if (cPage == 0) {
+       return (
+        <ul className="card-pagination">
+          <li style={liStyle3}>Page 1</li>
+          <li style={liStyle2}><a onClick={() => this.limitPerPage(5, 9, 1)}>Next</a></li>
+        </ul>
+      )
+    } else if (cPage < this.props.count - 1) {
+       return (
+        <ul className="card-pagination">
+          <li style={liStyle2}><a onClick={() => this.limitPerPage((cPage-1) * 5, (cPage * 5), -1)}>Back</a></li>
+          <li style={liStyle3}>Page {(cPage + 1)}</li>
+          <li style={liStyle2}><a onClick={() => this.limitPerPage((cPage+1) * 5, (cPage+2) * 5, 1)}>Next</a></li>
+        </ul>
+      )
+    } else {
+        return (
+        <ul className="card-pagination">
+          <li style={liStyle2}><a onClick={() => this.limitPerPage((cPage-1) * 5, cPage * 5, -1)}>Back</a></li>
+          <li style={liStyle3}>Page {(cPage-1)}</li>
+        </ul>
+      )
+    }
+  }
+
   render() {
-	  var divStyle = {
-      background: "#eee",
-      padding: "20px",
-      margin: "20px",
-      float: "left",
-      display: "inline-grid"
-    };
-    const {count, page} = this.props;
-    console.log(this.props,this.state,"Datas");
+	  const {count, currentPage,users} = this.props.users;
+      
+    const {fetchUsers} =this.props;
+
+    console.log(this.props,this.state,"Data_Render_list");
+    
+    if (this.props.isLoading) {
+            return <p>Loading…</p>;
+      }
     return (
       <div>
         <SearchPanel search={this.props.search}  onSearchChanged={this.props.onSearchChanged} onSearchKeyUp={this.handleSearchKeyup}  />
-
-       <PagingPanel count={count} page={page} onNextPage={() => {
-            changePage(page+1);
-            fetchUsers()
-        }} onPreviousPage={ () => {
-            changePage(page-1);
-            fetchUsers() }}/>
+           <br/>
+      
+        PAGINATION :{this.renderPageLinks()}
         {
-          this.props.items.map((item, index) => {
-            if (!this.filterResult(item)) return null;
+          users.map((user, index) => {
+            if (!this.filterResult(user)) return null;
             return (
-              <div style={divStyle} key={item.id} >
-                <ul>
-                  <li>{item.name}</li>
-                  <li>{item.username}</li>
-                  <li>{item.email}</li>
-                  <li>{item.website}</li>
-                </ul>
-              </div>
+             <ListUser key={user.id} {...user}/>
+             
             )
           })
         }
@@ -67,11 +122,18 @@ class List extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  items: state.users.items,
-  rows:state.users.rows,
-  search: state.users.search
+  users: state.users,
+  search: state.users.search,
+  isLoading:state.users.isLoading,
+  count:state.users.count,
+  currentPage:state.users.currentPage,
 });
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ fetchUsers, setSearch }, dispatch);
+const mapDispatchToProps = (dispatch) => 
+bindActionCreators({
+  fetchUsers:(begin,end) =>fetchUsers(begin,end),
+  setSearch,
+  requestUsersPage
+  }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(List);

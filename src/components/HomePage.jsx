@@ -13,7 +13,7 @@ class HomePage extends React.Component {
 		<Menu/>
         <h1>Product List</h1>
 
-        <p>Best way manage your Book collection.</p>
+        <p>Best way Manage your Users Collection.</p>
         
       </div>
     );

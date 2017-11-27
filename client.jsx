@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
+import { syncHistoryWithStore, routerMiddleware } from "react-router-redux";
 import thunk from 'redux-thunk';
 import reducers from './src/reducers';
 const App = require('./App').default;
@@ -15,6 +16,7 @@ const store = createStore(
 	  applyMiddleware(thunk)
   )
 );
+
 ReactDOM.render((
 	<Provider store={store}>
 	<BrowserRouter>

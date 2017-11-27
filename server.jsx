@@ -7,17 +7,19 @@ import thunk from 'redux-thunk';
 import {Helmet} from "react-helmet";
 import Template from './template';
 import reducers from './src/reducers';
-import  { fetchUsers, getParameterByName, setSearch } from './src/reducers/users';
+import  { fetchUsers, getParameterByName, setSearch ,requestUsersPage} from './src/reducers/users';
 import App from './App';
 
 const store = createStore(reducers, applyMiddleware(thunk));
 export default function serverRenderer({ clientStats, serverStats }) {
 	return (req, res, next) => {
-	
+	    
 		if (req.query.q) {
 		    console.log(req,res,next);
 			store.dispatch(setSearch(req.query.q));
 		}
+		
+		
 		store.dispatch(fetchUsers())
 			.then(() => {
 				const context = {};

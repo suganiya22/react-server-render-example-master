@@ -11,14 +11,23 @@ export default class SearchPanel extends React.Component {
     }
 
     render() {
-		
+		var searchStyle={
+            width: "300px",
+            height: "18px",
+            borderRadius:"10px",
+            padding: "5px",
+            opacity:"0.8",
+        }
+        var Fcolumn={
+          float:"right"
+        }
         return (
             <div className="row">
 			    
-                <div className="one-fourth column">
+                <div>
 				<form onSubmit={this.handleOnSubmit}>
-                    Search: &nbsp;
-                    <input ref='search'  placeholder="Search users..." name='search' type='text' defaultValue={this.props.search} 
+                    SEARCH: &nbsp;
+                    <input  style={searchStyle} ref='search'  placeholder="Search users..." name='search' type='text' defaultValue={this.props.search} 
 					 onChange={this.onSearchChanged } />
                     
 					</form>
